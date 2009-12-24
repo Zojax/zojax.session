@@ -1,0 +1,174 @@
+=============
+Browser tests
+=============
+
+    >>> from zope import component, interface
+    >>> from zope.interface import verify
+    >>> from zope.testbrowser.testing import Browser
+    >>> from zope.session.interfaces import \
+    ...      IClientIdManager, ISessionDataContainer
+    >>> from zope.app.component.hooks import setSite
+    >>> from zojax.session.interfaces import \
+    ...      ISessionConfiglet, ISessionDataFactory
+
+    >>> root = getRootFolder()
+    >>> setSite(root)
+    >>> root.getSiteManager().getUtility(IClientIdManager)
+    <zope.session.http.CookieClientIdManager ...>
+
+Admin browser
+
+    >>> admin = Browser()
+    >>> admin.addHeader("Authorization", "Basic mgr:mgrpw")
+    >>> admin.handleErrors = False
+
+Configlet
+
+    >>> admin.open('http://localhost/settings/')
+    >>> admin.getLink('Session').click()
+
+    >>> print admin.contents
+    <!DOCTYPE html...
+    ...
+    <h1 class="z-form-label">Session</h1><div class="z-form-description">Site sessions configuration.</div>...
+    ...
+    <div class="z-listing-details">
+        <label for="form-widgets-sessiontype-0">
+           <span>Persistent Session</span>
+        </label>
+        <div>A Session data container that stores data in ZODB.</div>
+    </div>
+    ...
+    ...<div class="z-listing-details">
+       <label for="form-widgets-sessiontype-1">
+          <span>RAM Session</span>
+       </label>
+       <div>A Session data container that stores data in RAM.</div>
+    </div>
+    ...
+    </html>
+
+
+    >>> fram = component.getUtility(ISessionDataFactory, name="ram")
+    >>> fpers = component.getUtility(ISessionDataFactory, name="persistent")
+
+    >>> admin.getControl(
+    ...     name="form.widgets.sessiontype:list").value = ["ram"]
+    >>> admin.getControl('Save').click()
+
+    >>> root.getSiteManager().getUtility(ISessionDataContainer)
+    <zope.session.session.RAMSessionDataContainer ...>
+
+    >>> fram.install()
+    Traceback (most recent call last):
+    ...
+    ValueError: Session data container already installed.
+
+    >>> fpers.isInstalled()
+    False
+
+    >>> admin.getControl(
+    ...     name="form.widgets.sessiontype:list").value = ["persistent"]
+    >>> admin.getControl('Save').click()
+
+    >>> root.getSiteManager().getUtility(ISessionDataContainer)
+    <zope.session.session.PersistentSessionDataContainer object ...>
+
+    >>> fpers.install()
+    Traceback (most recent call last):
+    ...
+    ValueError: Session data container already installed.
+
+    >>> fram.isInstalled()
+    False
+
+
+Memcached
+
+    >>> admin.open('http://localhost/settings/')
+    >>> admin.getLink('Memcached').click()
+    >>> admin.getControl(name="configlet.widgets.enabled:list").value = ['true']
+    >>> admin.getControl('Save').click()
+
+    >>> admin.getLink('Session').click()
+    >>> print admin.contents
+    <!DOCTYPE html...
+    ...
+    <h1 class="z-form-label">Session</h1><div class="z-form-description">Site sessions configuration.</div>...
+    ...
+    <div class="z-listing-details">
+        <label for="form-widgets-sessiontype-0">
+           <span>Memcached Session</span>
+        </label>
+        <div>A Session data container that stores data in Memcached.</div>
+    </div>
+    ...
+    <div class="z-listing-details">
+        <label for="form-widgets-sessiontype-1">
+           <span>Persistent Session</span>
+        </label>
+        <div>A Session data container that stores data in ZODB.</div>
+    </div>
+    ...
+    ...<div class="z-listing-details">
+       <label for="form-widgets-sessiontype-2">
+         <span>RAM Session</span>
+       </label>
+       <div>A Session data container that stores data in RAM.</div>
+    </div>
+    ...
+    </html>
+
+    >>> admin.getControl(
+    ...     name="form.widgets.sessiontype:list").value = ["memcached"]
+    >>> admin.getControl(name="form.buttons.save").click()
+
+    >>> root.getSiteManager().getUtility(ISessionDataContainer)
+    <lovely.session.memcached.MemCachedSessionDataContainer ...>
+
+    >>> factory = component.getUtility(ISessionDataFactory, name="memcached")
+    >>> factory.isAvailable()
+    True
+
+    >>> factory.install()
+    Traceback (most recent call last):
+    ...
+    ValueError: Session data container already installed.
+
+
+Disable memcached client
+
+    >>> admin.getLink('Memcached').click()
+    >>> admin.getControl(
+    ...     name="configlet.widgets.enabled:list").value = ['false']
+    >>> admin.getControl('Save').click()
+
+    >>> root.getSiteManager().getUtility(ISessionDataContainer)
+    <zope.session.session.RAMSessionDataContainer ...>
+
+
+Configlet available only in containment root
+
+    >>> from zope.security.management import newInteraction
+
+    >>> newInteraction()
+
+    >>> configlet = component.getUtility(ISessionConfiglet)
+    >>> configlet.isAvailable()
+    True
+
+    >>> from zope.app.component.site import LocalSiteManager
+    >>> from zojax.session.tests.tests import Portal
+ 
+    >>> root['portal'] = Portal()
+    >>> root['portal'].setSiteManager(LocalSiteManager(root['portal']))
+
+    >>> setSite(root['portal'])
+
+    >>> configlet.isAvailable()
+    False
+
+Cleanup
+
+    >>> setSite(None)
+
