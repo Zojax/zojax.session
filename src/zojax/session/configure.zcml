@@ -1,0 +1,54 @@
+<configure
+   xmlns="http://namespaces.zope.org/zope"
+   xmlns:zojax="http://namespaces.zope.org/zojax"
+   xmlns:browser="http://namespaces.zope.org/browser"
+   i18n_domain="zope">
+
+  <zojax:configlet
+     name="system.session"
+     schema=".interfaces.ISessionConfiglet"
+     class=".configlet.SessionConfiglet"
+     title="Session"
+     description="Site sessions configuration."
+     permission="zope.ManageServices" />
+
+  <include file="subscribers.zcml" />
+
+  <!-- vocabularies -->
+  <utility
+     name="session.data.factory"
+     provides="zope.schema.interfaces.IVocabularyFactory"
+     component=".vocabulary.SessionFactories" />
+
+  <!-- ram session container -->
+  <utility
+     name="ram"
+     factory=".ram.RamSessionFactory" />
+
+  <!-- persistent session container -->
+  <utility
+     name="persistent"
+     factory=".persistent.PersistentSessionFactory" />
+
+  <!-- memcached session container -->
+  <utility
+     name="memcached"
+     factory=".memcached.MemcachedSessionFactory" />
+
+  <subscriber handler=".memcached.memcachedClientUnregisterHandler" />
+
+  <!-- session data container configure -->
+  <zojax:pagelet
+     name="config"
+     type="form.subform"
+     for=".interfaces.ISessionConfiglet
+    zojax.controlpanel.browser.configlet.Configlet"
+     class=".view.ConfigureForm" />
+
+   <!-- generations -->
+  <utility
+     name="zojax.session"
+     provides="zope.app.generations.interfaces.ISchemaManager"
+     component=".generations.schemaManager" />
+
+</configure>
