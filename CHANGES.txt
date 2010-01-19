@@ -1,23 +1,8 @@
-=======
-CHANGES
-=======
-
-
-0.2.1 (2009-11-21)
+1.0.2 (Unreleased)
 ------------------
 
-- Tests updated, 100% coverage
 
-
-0.2.0 (2009-07-14)
+1.0.1 (2010-01-19)
 ------------------
 
-- Added memcached session
-
-- Update test for chameleon enabled setup
-
-
-0.1.0 (2009-06-04)
-------------------
-
-- Initial release.
+- zojax initial release
