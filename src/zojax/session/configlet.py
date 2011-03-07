@@ -11,6 +11,7 @@
 # FOR A PARTICULAR PURPOSE.
 #
 ##############################################################################
+from zope.app.folder.interfaces import IFolder
 """
 
 $Id$
@@ -46,7 +47,8 @@ class SessionConfiglet(object):
         getUtility(ISessionDataFactory, value).install()
 
     def isAvailable(self):
-        if not IContainmentRoot.providedBy(getSite()):
+        if not IContainmentRoot.providedBy(getSite()) and not \
+            IFolder.providedBy(getSite().__parent__):
             return False
 
         return super(SessionConfiglet, self).isAvailable()
