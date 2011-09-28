@@ -54,7 +54,7 @@ Configlet
 
     >>> admin.getControl(
     ...     name="form.widgets.sessiontype:list").value = ["ram"]
-    >>> admin.getControl('Save').click()
+    >>> admin.getControl('Save', index=0).click()
 
     >>> root.getSiteManager().getUtility(ISessionDataContainer)
     <zope.session.session.RAMSessionDataContainer ...>
@@ -69,7 +69,7 @@ Configlet
 
     >>> admin.getControl(
     ...     name="form.widgets.sessiontype:list").value = ["persistent"]
-    >>> admin.getControl('Save').click()
+    >>> admin.getControl('Save', index=0).click()
 
     >>> root.getSiteManager().getUtility(ISessionDataContainer)
     <zope.session.session.PersistentSessionDataContainer object ...>
@@ -147,7 +147,7 @@ Disable memcached client
     <zope.session.session.RAMSessionDataContainer ...>
 
 
-Configlet available only in containment root
+Configlet available only in root portal
 
     >>> from zope.security.management import newInteraction
 
@@ -166,7 +166,7 @@ Configlet available only in containment root
     >>> setSite(root['portal'])
 
     >>> configlet.isAvailable()
-    False
+    True
 
 Cleanup
 

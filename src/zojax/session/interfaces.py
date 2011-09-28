@@ -15,8 +15,13 @@
 
 $Id$
 """
-from zope import interface, schema
+from zope import interface, schema, i18nmessageid
+from zope.session.http import ICookieClientIdManager
+
 from zojax.widget.radio.field import RadioChoice
+
+
+_ = i18nmessageid.MessageFactory('zojax.session')
 
 
 class ISessionConfiglet(interface.Interface):

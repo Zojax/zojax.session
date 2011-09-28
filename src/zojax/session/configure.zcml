@@ -37,6 +37,15 @@
 
   <subscriber handler=".memcached.memcachedClientUnregisterHandler" />
 
+  <!-- session client id manager configure -->
+  <zojax:pagelet
+     name="clientid"
+     type="form.subform"
+     for=".interfaces.ISessionConfiglet
+    zojax.controlpanel.browser.configlet.Configlet"
+     class=".view.ConfigureClientIdManagerForm" />
+
+
   <!-- session data container configure -->
   <zojax:pagelet
      name="config"
